@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 
 class AngelController extends Controller
 {
+    private $table_name = 'customer';
+
     /**
      * Display a listing of the resource.
      *
@@ -16,8 +18,9 @@ class AngelController extends Controller
      */
     public function index()
     {
-        //
-        return view('welcome');
+        // List all customers
+        $users = DB::table('customer')->select('id', 'name', 'contactNumber', 'isSuspended')->get();
+        return 'sdadas';
     }
 
     /**
@@ -28,6 +31,7 @@ class AngelController extends Controller
     public function create()
     {
         //
+        return view('create', ['name' => 'Juani']);
     }
 
     /**
@@ -38,7 +42,14 @@ class AngelController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Get the values
+        $userInputs = retrieveInputs($request);
+
+        // Insert
+        DB::table($this->table_name)->insert([$userInputs]);
+
+        // Return
+        return response()->json(['message' => 'Succesfully added user!']);
     }
 
     /**
@@ -49,7 +60,12 @@ class AngelController extends Controller
      */
     public function show($id)
     {
-        //
+        // Display user information
+        $userInfo = DB::table($this->table_name)
+        ->select('id', 'name', 'contactNumber', 'isSuspended')
+        ->where('id', $id)
+        ->get();
+        return response()->json($userInfo);
     }
 
     /**
@@ -60,7 +76,12 @@ class AngelController extends Controller
      */
     public function edit($id)
     {
-        //
+        // Display user information
+        $userInfo = DB::table($this->table_name)
+        ->select('id', 'name', 'contactNumber', 'isSuspended')
+        ->where('id', $id)
+        ->get();
+        return view('edit', $userInfo);
     }
 
     /**
@@ -72,7 +93,16 @@ class AngelController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        // Get the values
+        $userInputs = retrieveInputs($request);
+
+        // Update
+        DB::table($this->table_name)
+        ->where('id', $id)
+        ->update([$userInputs]);
+
+        // Return
+        return response()->json(['message' => 'Succesfully updated user!']);
     }
 
     /**
@@ -83,6 +113,21 @@ class AngelController extends Controller
      */
     public function destroy($id)
     {
-        //
+        // Delete this user
+        DB::table($this->table_name)
+        ->where('id', '=', $id)
+        ->delete();
+
+        // Return
+        return response()->json(['message' => 'Succesfully deleted user!']);
+    }
+
+    private function retrieveInputs(Request $request)
+    {
+        // Retrieve inputs
+        $name = $request->input('name');
+        $contactNumber = $request->input('contactNumber', '+639053343746');
+        $isSuspended = $request->input('isSuspended', false);
+        return ['name' => $name, 'contactNumber' => $contactNumber, 'isSuspended' => $isSuspended];
     }
 }
